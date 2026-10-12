@@ -41,8 +41,8 @@ export default function Home() {
 
   return (
     <main className="root">
-      {stage === "landing" && <Landing onStart={handleStart} />}
-      {process.env.NODE_ENV !== "production" && stage === "landing" && (
+      {stage === "landing" && <Landing onStart={() => handleStart(false)} />}
+      {process.env.NODE_ENV === "development" && stage === "landing" && (
         <button
           onClick={() => handleStart(true)}
           style={{

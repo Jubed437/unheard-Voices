@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { sendManuscript } from "@/lib/emailService";
 import { rateLimit } from "@/lib/rateLimit";
-import { sessions } from "@/lib/sessions";
+import { verifyToken } from "@/lib/jwt";
 import { headers } from "next/headers";
 
 const FIVE_MINUTES = 5 * 60 * 1000;
@@ -25,13 +25,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "no_session" }, { status: 400 });
   }
 
-  const session = sessions.get(sessionId);
+  const payload = verifyToken(sessionId);
 
-  if (!session) {
+  if (!payload || typeof payload.startedAt !== "number") {
     return NextResponse.json({ error: "session_expired" }, { status: 403 });
   }
 
-  const elapsed = Date.now() - session.startedAt;
+  const elapsed = Date.now() - payload.startedAt;
   if (elapsed < FIVE_MINUTES) {
     return NextResponse.json({ error: "session_not_ready" }, { status: 403 });
   }
